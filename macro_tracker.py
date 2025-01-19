@@ -11,10 +11,35 @@ import datetime
 from textblob import TextBlob
 from transformers import pipeline
 
-API_KEY = "c5tmsb8zUFSdHNtB4dGVeeEUyHveyggVlVdia5he"
-
 # Load a pre-trained emotion detection model
 emotion_model = pipeline("text-classification", model="bhadresh-savani/bert-base-uncased-emotion")
+
+API_KEY = "c5tmsb8zUFSdHNtB4dGVeeEUyHveyggVlVdia5he"
+
+# Hard-coded credentials (for demonstration purposes)
+USERNAME = "user"
+PASSWORD = "password123"
+
+# Function to handle login
+def login_page():
+    st.title("Login Page")
+    
+    # Form for login credentials
+    with st.form("login_form"):
+        username = st.text_input("Username", "")
+        password = st.text_input("Password", "", type="password")
+        
+        login_button = st.form_submit_button("Login")
+        
+        if login_button:
+            if username == USERNAME and password == PASSWORD:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.session_state.page_redirect = True  # Set a flag to show main content
+                st.success("Login successful!")
+                st.rerun()  # Reload the page to show the main content
+            else:
+                st.error("Invalid username or password!")
 
 def add_custom_css():
     st.markdown("""
@@ -473,6 +498,7 @@ def meditation_script():
     ]
     return script_parts
 
+# Sentiment Analysis function using TextBlob
 def analyze_sentiment(entry):
     # Create a TextBlob object
     blob = TextBlob(entry)
@@ -638,7 +664,8 @@ def chatbot():
         # Get chatbot's response
         response = chatbot_response(user_input)
         st.write(f"Chatbot: {response}")
-    
+
+
 def other_tracker():
     st.header("Sleep Tracker")
     
@@ -732,22 +759,35 @@ def other_tracker():
 def main():
     """Main app function with tabs including the Chat Support page."""
     st.set_page_config(page_title="Fitness Tracker", layout="wide")
-    add_custom_css()
+    
+    # Check if the user is logged in and handle redirection
+    if "logged_in" not in st.session_state or not st.session_state.logged_in:
+        login_page()  # Show login page if not logged in
+    else:
+        # Show main content if logged in
+        
+        add_custom_css()  # Apply custom CSS
+        
+        # Tabs for navigation at the top
+        tabs = st.tabs(["**Macro Tracker**", "Excercise Tracker", "Mental Health Support", "Chat Support", "Other Trackers"])
 
-    # Tabs for navigation at the top
-    tabs = st.tabs(["**Macro Tracker**", "Excercise Tracker", "Mental Health Support", "Chat Support", "Other Tackers"])
+        with tabs[0]:
+            macro_tracker()  # Add your macro tracker logic here
+        with tabs[1]:
+            exercise_tracker()  # Add your exercise tracker logic here
+        with tabs[2]:
+            mental_health_support()  # Add your mental health support logic here
+        with tabs[3]:
+            chatbot()  # Add your chatbot logic here
+        with tabs[4]:
+            other_tracker()  # Add your other tracker logic here
 
-    with tabs[0]:
-        macro_tracker()
-    with tabs[1]:
-        exercise_tracker()
-    with tabs[2]:
-        mental_health_support()
-    with tabs[3]:
-        chatbot()
-    with tabs[4]:
-        other_tracker()   
+        # Logout button
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.page_redirect = False  # Reset the flag
+            st.session_state.username = ""  # Clear the username
+            st.rerun()  # Reload the page to show the login page
 
 if __name__ == "__main__":
     main()
-
