@@ -8,9 +8,13 @@ import pyttsx3
 import pythoncom
 import plotly.graph_objects as go
 import datetime 
+from textblob import TextBlob
+from transformers import pipeline
 
 API_KEY = "c5tmsb8zUFSdHNtB4dGVeeEUyHveyggVlVdia5he"
 
+# Load a pre-trained emotion detection model
+emotion_model = pipeline("text-classification", model="bhadresh-savani/bert-base-uncased-emotion")
 
 def add_custom_css():
     st.markdown("""
@@ -602,8 +606,39 @@ def mental_health_support():
             st.write(f"Entry: {entry['journal_entry']}")
             st.write("---")
 
+# Function to detect emotion in the user's input
+def detect_emotion(input_text):
+    result = emotion_model(input_text)
+    return result[0]['label']
+
+# Chat function
+def chatbot_response(input_text):
+    emotion = detect_emotion(input_text)
+    
+    if emotion == "joy":
+        return "I'm glad to hear you're feeling happy! 😊 How can I help you today?"
+    elif emotion == "anger":
+        return "I'm sorry you're feeling angry. Would you like to talk about what's bothering you?"
+    elif emotion == "fear":
+        return "It sounds like you're feeling fearful. Take a deep breath, and know you're not alone."
+    elif emotion == "sadness":
+        return "I'm really sorry you're feeling down. It’s okay to feel sad sometimes. How can I support you?"
+    elif emotion == "surprise":
+        return "It sounds like something unexpected has happened. Want to talk about it?"
+    else:
+        return "I'm here to listen. Can you tell me more about how you're feeling?"
+
 def chatbot():
     st.title("Chat Support")
+    st.write("Welcome to the chatbot! How are you feeling today? You can talk to me about anything.")
+
+    user_input = st.text_input("Ask me a question about your mental health:")
+
+    if user_input:
+        # Get chatbot's response
+        response = chatbot_response(user_input)
+        st.write(f"Chatbot: {response}")
+    
 def other_tracker():
     st.header("Sleep Tracker")
     
