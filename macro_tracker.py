@@ -469,6 +469,23 @@ def meditation_script():
     ]
     return script_parts
 
+def analyze_sentiment(entry):
+    # Create a TextBlob object
+    blob = TextBlob(entry)
+    
+    # Get the sentiment polarity (-1 to 1)
+    sentiment = blob.sentiment.polarity
+    
+    if sentiment > 0:
+        mood = "Positive"
+    elif sentiment < 0:
+        mood = "Negative"
+    else:
+        mood = "Neutral"
+    
+    # Return mood and sentiment score
+    return mood, sentiment
+
 def add_custom_css():
     st.markdown("""
     <style>
@@ -551,15 +568,21 @@ def mental_health_support():
         # Get today's date using Python's datetime module
         current_date = datetime.datetime.now().date()  # Get today's date
         
+        # Analyze the sentiment of the journal entry
+        mood, sentiment_score = analyze_sentiment(journal_entry)
+        
         # Create a dictionary or log entry
         mental_health_data = {
             "date": str(current_date),  # Save the current date as a string
-            "journal_entry": journal_entry
+            "journal_entry": journal_entry,
+            "mood": mood,
+            "sentiment_score": sentiment_score
         }
         
-        # You can display the journal entry
+        # You can display the journal entry and sentiment
         st.write(f"Journal entry for {current_date}:")
         st.write(mental_health_data['journal_entry'])
+        st.write(f"Sentiment: {mental_health_data['mood']} (Sentiment score: {mental_health_data['sentiment_score']:.2f})")
         
         # Optionally save the entry to a session state or file (e.g., CSV or database)
         if "mental_health_entries" not in st.session_state:
